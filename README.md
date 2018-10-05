@@ -2,6 +2,10 @@
 
 [image1]: https://user-images.githubusercontent.com/10624937/42135608-be87357e-7d12-11e8-8eca-e6d5fabdba6b.gif "Trained Agent"
 
+# Notes for tensorflow version
+This is still in progress... It could be run but cannot solve the problem.
+If you have all required packages installed (such as `gym`, `box2d`, etc.), you can run simply by `bash train.sh`. 
+
 # Notes for Pytorch version
 
 The agent finally achieve mean rewards more than 30 over 100 episodes at last, just the time I was about the to give up ;)
