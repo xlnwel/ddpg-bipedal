@@ -61,6 +61,6 @@ class ActorCritic(Module):
         with tf.variable_scope('critic', reuse=reuse):
             x = tf.concat([x, action], 1)
             x = self._dense_norm_activation(x, 256, kernel_initializer=tf_utils.kaiming_initializer(), activation=tf.nn.relu)
-            x = self._dense(x, 1)
+            x = self._dense_norm_activation(x, 1)
 
         return x

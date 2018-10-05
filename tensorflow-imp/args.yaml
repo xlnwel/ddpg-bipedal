@@ -12,7 +12,6 @@ actor_critic:
     weight_decay: 0.0001
     actor:
         learning_rate: 0.0001
-        beta1: 0.9
     critic:
         learning_rate: 0.0003
 

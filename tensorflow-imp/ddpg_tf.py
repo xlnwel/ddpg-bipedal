@@ -89,9 +89,9 @@ class DDPG(Model):
     def _loss(self):
         with tf.name_scope('loss'):
             with tf.name_scope('l2_loss'):
-                encoder_l2_loss = tf.losses.get_regularization_loss(scope='ddpg/actor_critic/encoder', name='encoder_l2_loss')
-                actor_l2_loss = tf.losses.get_regularization_loss(scope='ddpg/actor_critic/actor', name='actor_l2_loss')
-                critic_l2_loss = tf.losses.get_regularization_loss(scope='ddpg/actor_critic/critic', name='critic_l2_loss')
+                encoder_l2_loss = tf.losses.get_regularization_loss(scope=self.actor_critic.variable_scope + '/state_encoder', name='encoder_l2_loss')
+                actor_l2_loss = tf.losses.get_regularization_loss(scope=self.actor_critic.variable_scope + '/actor', name='actor_l2_loss')
+                critic_l2_loss = tf.losses.get_regularization_loss(scope=self.actor_critic.variable_scope + '/critic', name='critic_l2_loss')
 
             with tf.name_scope('actor_loss'):
                 actor_loss = tf.negative(tf.reduce_mean(self.actor_critic.Q_with_actor), name='actor_loss') + encoder_l2_loss + actor_l2_loss
@@ -123,8 +123,8 @@ class DDPG(Model):
     def _optimize_objective(self, loss, name):
         # params for optimizer
         learning_rate = self._args['actor_critic'][name]['learning_rate'] if 'learning_rate' in self._args['actor_critic'][name] else 1e-3
-        beta1 = self._args['actor_critic'][name]['beta1'] if 'beta1' in self._args['actor_critic'][name] else 0.9
-        beta2 = self._args['actor_critic'][name]['beta2'] if 'beta2' in self._args['actor_critic'][name] else 0.999
+        beta1 = self._args['actor_critic'][name]['beta1'] if 'beta1' in self._args['actor_critic'][name] else .9
+        beta2 = self._args['actor_critic'][name]['beta2'] if 'beta2' in self._args['actor_critic'][name] else .999
         clip_norm = self._args[name]['actor_critic']['clip_norm'] if 'clip_norm' in self._args['actor_critic'] else 5.
 
         with tf.variable_scope(name+'_opt', reuse=self.reuse):
