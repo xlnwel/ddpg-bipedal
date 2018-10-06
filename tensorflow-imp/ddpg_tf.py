@@ -37,7 +37,7 @@ class DDPG(Model):
         self.sess.run(self.noise_op)
         state = state.reshape((-1, self.state_size))
         action = self.sess.run(self.actor_critic.actor_action, feed_dict={self.actor_critic.state: state})
-        
+        self.sess.run(self.denoise_op)
         return np.squeeze(action)
 
     def step(self, state, action, reward, next_state, done):
@@ -66,7 +66,7 @@ class DDPG(Model):
         self.init_target_op, self.update_target_op = self._targetnet_ops() 
         
         # operations that add/remove noise from parameters
-        self.noise_op = self._noise_params()
+        self.noise_op, self.denoise_op = self._noise_params()
         
     def _setup_env(self):
         self.state_size = self._args[self.name]['state_size']
@@ -186,20 +186,16 @@ class DDPG(Model):
 
             noise_decay_op = tf.assign(noise_sigma, self.noise_decay * noise_sigma, name='noise_decay_op')
 
-            noises = []
+            param_noise_pairs = []
             for var in self.actor_critic.actor_perturbable_variables:
                 noise = tf.truncated_normal(tf.shape(var), stddev=noise_sigma)
-                noises.append(noise)
-            
-            if self.log_tensorboard:
-                tf.summary.scalar('noise_sigma_', noise_sigma)
-
-            param_noise_pairs = zip(self.actor_critic.actor_perturbable_variables, noises)
+                param_noise_pairs.append((var, noise))
 
             with tf.control_dependencies([noise_decay_op]):
                 noise_op = list(map(lambda v: tf.assign(v[0], v[0] + v[1], name='noise_op'), param_noise_pairs))
+                denoise_op = list(map(lambda v: tf.assign(v[0], v[0] - v[1], name='denoise_op'), param_noise_pairs))
 
-        return noise_op
+        return noise_op, denoise_op
 
     def _initialize_target_net(self):
         self.sess.run(self.init_target_op)
